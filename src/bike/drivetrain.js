@@ -38,20 +38,30 @@ export function sprocketGeometry(teeth, thickness, { holeR = null, toothDepth = 
 }
 
 function crankArm(M, side) {
-  // Forged alloy arm: tapered box with rounded edges (capsule-ish profile)
+  // Forged alloy arm: lofted rounded profile, wide at the spindle and
+  // tapering toward the pedal eye.
   const grp = new THREE.Group();
-  const seg = new THREE.Mesh(new THREE.BoxGeometry(CRANK_LEN * 0.92, 0.030, 0.014), M.crank);
-  seg.position.set(CRANK_LEN * 0.46, 0, 0);
-  seg.geometry.translate(0, 0, 0);
-  grp.add(seg);
-  // soften silhouette with end cylinders
-  const boss = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.0165, 18), M.crank);
+  const profile = new THREE.Shape();
+  const w0 = 0.0165, w1 = 0.0115;          // half-heights at each end
+  profile.moveTo(0, w0);
+  profile.bezierCurveTo(CRANK_LEN * 0.4, w0 * 0.82, CRANK_LEN * 0.7, w1 * 1.1, CRANK_LEN, w1);
+  profile.absarc(CRANK_LEN, 0, w1, Math.PI / 2, -Math.PI / 2, true);
+  profile.bezierCurveTo(CRANK_LEN * 0.7, -w1 * 1.1, CRANK_LEN * 0.4, -w0 * 0.82, 0, -w0);
+  profile.absarc(0, 0, w0, -Math.PI / 2, Math.PI / 2, true);
+  const geo = new THREE.ExtrudeGeometry(profile, {
+    depth: 0.011, bevelEnabled: true, bevelThickness: 0.0022, bevelSize: 0.0022, bevelSegments: 3,
+  });
+  geo.translate(0, 0, -0.0055);
+  const arm = new THREE.Mesh(geo, M.crank);
+  grp.add(arm);
+  // Spindle boss + crank bolt
+  const boss = new THREE.Mesh(new THREE.CylinderGeometry(0.0175, 0.0175, 0.018, 18), M.crank);
   boss.rotation.x = Math.PI / 2;
   grp.add(boss);
-  const pedalBoss = new THREE.Mesh(new THREE.CylinderGeometry(0.0135, 0.0135, 0.015, 16), M.crank);
-  pedalBoss.rotation.x = Math.PI / 2;
-  pedalBoss.position.x = CRANK_LEN;
-  grp.add(pedalBoss);
+  const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.0075, 0.0075, 0.004, 12), M.steel);
+  bolt.rotation.x = Math.PI / 2;
+  bolt.position.z = side * 0.010;
+  grp.add(bolt);
   grp.userData.side = side;
   return grp;
 }

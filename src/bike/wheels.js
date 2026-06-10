@@ -122,5 +122,27 @@ export function buildWheel(M, { rear = false } = {}) {
   valve.position.set(0, spokeRimR - 0.012, 0);
   spin.add(valve);
 
+  // --- Sidewall accent stripe (subtle tan-line ring like a kevlar bead)
+  for (const side of [1, -1]) {
+    const stripe = new THREE.Mesh(
+      new THREE.TorusGeometry(tireCentreR + WHEEL.tireTubeR * 0.42, 0.0011, 6, 80), M.tireWall);
+    stripe.position.z = side * WHEEL.tireTubeR * 0.78;
+    spin.add(stripe);
+  }
+
+  // --- Quick-release skewer: nut + curved lever on the non-drive side
+  const qrNut = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.0078, 0.008, 12), M.darkSteel);
+  qrNut.rotation.x = Math.PI / 2;
+  qrNut.position.z = 0.0712;
+  group.add(qrNut);
+  const lever = new THREE.Mesh(new THREE.CapsuleGeometry(0.0042, 0.042, 4, 10), M.black);
+  lever.position.set(0.008, -0.025, -0.069);
+  lever.rotation.z = 0.5;
+  group.add(lever);
+  const leverHead = new THREE.Mesh(new THREE.SphereGeometry(0.0085, 12, 10), M.black);
+  leverHead.position.set(-0.004, -0.003, -0.069);
+  leverHead.scale.set(1.2, 1, 0.7);
+  group.add(leverHead);
+
   return { group, spin };
 }

@@ -16,45 +16,45 @@ function buildCaliper(M) {
   const grp = new THREE.Group();
   const arms = [];
 
-  // Mounting bolt + spring barrel
+  // Mounting bolt runs fore-aft (local X) through the crown / bridge
   const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.030, 12), M.steel);
-  bolt.rotation.x = Math.PI / 2;
+  bolt.rotation.z = Math.PI / 2;
   grp.add(bolt);
-  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.0105, 0.0105, 0.016, 14), M.crank);
-  barrel.rotation.x = Math.PI / 2;
-  barrel.position.z = 0.004;
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.0105, 0.0105, 0.016, 14), M.darkSteel);
+  barrel.rotation.z = Math.PI / 2;
+  barrel.position.x = 0.006;
   grp.add(barrel);
 
   for (const side of [1, -1]) {
-    // Each arm pivots a few degrees about Z when squeezed
+    // Dual-pivot: arms swing about the fore-aft axis so pads close on the rim
     const arm = new THREE.Group();
     grp.add(arm);
     const tube = curveTube([
-      new THREE.Vector3(0, 0.012, side * 0.006),
-      new THREE.Vector3(side * 0.020, 0.000, side * 0.020),
-      new THREE.Vector3(side * 0.030, -0.022, side * 0.0235),
-      new THREE.Vector3(side * 0.016, -0.040, side * 0.016),
-    ], 0.0062, M.crank, 24, 10);
-    tube.scale.x = 1.15;
+      new THREE.Vector3(0, 0.014, -side * 0.004),
+      new THREE.Vector3(0.002, 0.004, side * 0.018),
+      new THREE.Vector3(0.002, -0.024, side * 0.024),
+      new THREE.Vector3(0.001, -0.042, side * 0.017),
+    ], 0.0058, M.steel, 24, 10);
+    tube.scale.x = 1.5;   // flatten fore-aft into a forged-arm look
     arm.add(tube);
-    // Pad holder + pad
-    const pad = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.014, 0.0045), M.black);
-    pad.position.set(side * 0.012, -0.047, side * 0.0135);
+    // Pad holder + pad (pad face ~1.5 mm off the brake track at rest)
+    const pad = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.011, 0.0045), M.black);
+    pad.position.set(0, -0.0485, side * 0.0145);
     arm.add(pad);
-    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.016, 0.002), M.steel);
-    shoe.position.set(side * 0.012, -0.047, side * 0.0165);
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.013, 0.002), M.darkSteel);
+    shoe.position.set(0, -0.0485, side * 0.0175);
     arm.add(shoe);
     arms.push(arm);
   }
 
-  // Cable pinch arm + barrel adjuster on the drive-side arm top
-  const adj = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.014, 10), M.steel);
-  adj.position.set(-0.012, 0.020, 0.006);
+  // Barrel adjuster + cable stop on top
+  const adj = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, 0.014, 10), M.steel);
+  adj.position.set(0, 0.022, -0.004);
   grp.add(adj);
 
   function squeeze(t) {
-    arms[0].rotation.z = -t * 0.045;
-    arms[1].rotation.z = t * 0.045;
+    arms[0].rotation.x = t * 0.055;    // +z arm closes inward
+    arms[1].rotation.x = -t * 0.055;
   }
   return { grp, squeeze };
 }

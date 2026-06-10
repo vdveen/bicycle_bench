@@ -31,16 +31,27 @@ vision-verified screenshots in `./iterations/`.
   window.__app API for headless control (setView/setCrank/setSteer/setBrake).
 
 ## Iteration log
-- iter_001 (scaffold): full bike renders, correct proportions. Issues found:
-  fork renders silver not carbon; cassette blown-out white; RD cage = crude
-  black box; grip collars too loud; seat tube red band swallowed by tube taper.
+- iter_001 (scaffold): full bike renders, correct proportions.
+- iter_002-004: carbon/alu/steel material fixes, RD cage redesign (dog-bone
+  plates + jockey bolts), subtle grip collars, headset accent ring.
+- iter_005-006: KEY LESSON — scene was overlit (key 2.6 + env 0.85): light-gray
+  metals clipped white under ACES. Lights now key 1.45/rim 0.55/amb 0.22/env 0.7.
+  Cassette color darkened (nickel steel 0x53585d). Asymmetric rear hub flange
+  (drive side z=0.018) so cassette clears it.
+- iter_007: forged crank arm (lofted extrude), QR skewers, sidewall stripes,
+  bottle bosses, tighter KOGA decal.
+- iter_008: caliper rebuild — pivot about fore-aft X axis (pads close on rim
+  faces), silver arms. Verified: crank phases (pedals stay level), steer+lean,
+  pad-gap A/B closeup, lever pull. tools/verify.mjs captures all of these.
+
+## Verified working
+- Chain belt-path solver wraps: cog 168°, ring 183°, S-bend through jockeys.
+- Freehub model: pedal forward engages, coast decays, brake decelerates wheel.
+- __app headless API: setView/lookAt/setCrank/setSteer/setLean/setBrake.
 
 ## TODO / known issues
-- [ ] Fix carbon material (too bright — set canvas tex colorSpace, lower clearcoat)
-- [ ] Darken brushed alu (cassette)
-- [ ] Redesign RD cage + visible jockey wheels; verify chain S-path visually
-- [ ] Verify chain wrap at chainring (dedicated chain view)
-- [ ] Grip collars subtler; red band radius fix
-- [ ] Brake closeup view + verify pad gap/squeeze
-- [ ] Front caliper visibility/detail, cable line check
-- [ ] Tire tread, hub QR levers, bottle bosses, chainstay ovalization (polish)
+- [ ] Lever blade pull visibility from side closeup
+- [ ] Front derailleur cage looks like bent wires — could be plate-ier
+- [ ] Hero composition / floor could be richer
+- [ ] README + npm scripts
+- [ ] Final scrutiny loop at all views

@@ -114,7 +114,7 @@ const VIEWS = {
   derailleur: { pos: [-0.36, 0.30, 0.52], tgt: [-0.41, 0.28, 0.03] },
   front:      { pos: [2.6, 0.62, 0.9], tgt: [0.3, 0.55, 0] },
   chain:      { pos: [0.05, 0.24, 1.05], tgt: [-0.12, 0.26, 0] },
-  brake:      { pos: [0.95, 0.75, 0.55], tgt: [0.66, 0.64, 0] },
+  brake:      { pos: [-0.52, 0.86, 0.30], tgt: [-0.19, 0.615, 0] },
 };
 
 const camTween = { active: false, t: 0, fromP: new THREE.Vector3(), toP: new THREE.Vector3(), fromT: new THREE.Vector3(), toT: new THREE.Vector3() };
@@ -293,7 +293,14 @@ window.__app = {
   },
   ready: true,
   setView: (name) => setView(name, true),
-  setCrank: (a) => { state.crankAngle = a; step(0.001); renderer.render(scene, camera); },
+  setCrank: (a) => {
+    state.crankAngle = a;
+    state.chainOffset = -a * CHAINRING_R;
+    // wheel phase consistent with gear ratio
+    state.wheelAngle = a * GEAR_RATIO;
+    step(0.001); renderer.render(scene, camera);
+  },
+  setLean: (a) => { state.lean = a; bikeRoot.rotation.x = a; renderer.render(scene, camera); },
   setSteer: (a) => { state.steerAngle = a; state.steerTarget = a; steer.rotation.y = a; renderer.render(scene, camera); },
   setBrake: (t) => { state.brake = t; state.brakeTarget = t; brakes.squeeze(t); leverPivots[0].rotation.z = -t * 0.3; leverPivots[1].rotation.z = -t * 0.3; renderer.render(scene, camera); },
   autopedal: (on) => { state.autopedal = on; },

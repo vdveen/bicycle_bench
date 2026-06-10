@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import {
   BB, REAR_AXLE, HEAD_TUBE_BOT, HEAD_TUBE_TOP, SEAT_TUBE_TOP, TT_FRONT, TT_REAR,
-  DT_FRONT, SS_TOP, SADDLE_POS, STEER_UP, SEAT_UP, TUBES, taperedTube, curveTube,
+  DT_FRONT, SS_TOP, SADDLE_POS, STEER_UP, SEAT_UP, SEAT_TUBE_LEN, TUBES,
+  taperedTube, curveTube,
 } from './geo.js';
 import { kogaDecalTexture, f3BadgeTexture } from './materials.js';
 
@@ -96,6 +97,23 @@ export function buildFrame(M) {
   g.add(post);
 
   g.add(buildSaddle(M));
+
+  // --- Bottle cage bosses on the down tube and seat tube
+  const dtDirN = DT_FRONT.clone().sub(BB).normalize();
+  for (const t of [0.18, 0.245]) {
+    const boss = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.003, 10), M.steel);
+    boss.position.copy(BB).addScaledVector(dtDirN, t * DT_FRONT.distanceTo(BB) + 0.10);
+    boss.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(-dtDirN.y, dtDirN.x, 0));
+    boss.translateY(TUBES.downTubeR0 * 0.92);
+    g.add(boss);
+  }
+  for (const t of [0.30, 0.43]) {
+    const boss = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.003, 10), M.steel);
+    boss.position.copy(BB).addScaledVector(SEAT_UP, t * SEAT_TUBE_LEN);
+    boss.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(SEAT_UP.y, -SEAT_UP.x, 0));
+    boss.translateY(-(TUBES.seatTubeR + 0.001));
+    g.add(boss);
+  }
 
   // --- Decals
   addDecals(g, M);

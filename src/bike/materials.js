@@ -182,8 +182,8 @@ export function kogaDecalTexture() {
   ctx.fillStyle = '#f2f2f2';
   ctx.save();
   ctx.translate(512, 64);
-  ctx.scale(1.25, 1.0);
-  for (let i = 0, txt = 'KOGA', x = -150; i < txt.length; i++, x += 100) {
+  ctx.scale(1.35, 1.0);
+  for (let i = 0, txt = 'KOGA', x = -120; i < txt.length; i++, x += 80) {
     ctx.fillText(txt[i], x, 0);
   }
   ctx.restore();
