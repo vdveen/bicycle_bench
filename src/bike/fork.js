@@ -31,12 +31,15 @@ export function buildSteering(M) {
   steerer.position.y = crownY + (HEAD_TUBE_LEN + SPACER_STACK + 0.03) / 2;
   steer.add(steerer);
 
-  // Headset spacers + top cap
+  // Headset spacers + top cap (one thin red accent ring)
   for (let i = 0; i < 3; i++) {
-    const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.0165, 0.0165, 0.0075, 20), i === 1 ? M.accent : M.black);
+    const sp = new THREE.Mesh(new THREE.CylinderGeometry(0.0165, 0.0165, 0.0075, 20), M.black);
     sp.position.y = HEAD_TUBE_LEN + 0.006 + i * 0.008;
     steer.add(sp);
   }
+  const accentRing = new THREE.Mesh(new THREE.CylinderGeometry(0.0167, 0.0167, 0.0028, 20), M.accent);
+  accentRing.position.y = HEAD_TUBE_LEN + 0.014;
+  steer.add(accentRing);
   const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.0162, 0.017, 0.006, 20), M.darkSteel);
   cap.position.y = HEAD_TUBE_LEN + SPACER_STACK + 0.024;
   steer.add(cap);
@@ -110,9 +113,10 @@ export function buildSteering(M) {
     grip.position.z = gz + side * 0.0;
     steer.add(grip);
     for (const e of [1, -1]) {
-      const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.0165, 0.0165, 0.006, 16), M.accent);
+      const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.0160, 0.0160, 0.0035, 16),
+        e === side ? M.accent : M.black);
       ring.rotation.x = Math.PI / 2;
-      ring.position.copy(grip.position).add(new THREE.Vector3(0, 0, e * 0.0625));
+      ring.position.copy(grip.position).add(new THREE.Vector3(0, 0, e * 0.0635));
       steer.add(ring);
     }
 

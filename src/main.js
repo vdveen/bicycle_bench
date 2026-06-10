@@ -33,12 +33,12 @@ scene.fog = new THREE.Fog(0x101214, 8, 22);
 
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.85;
+scene.environmentIntensity = 0.7;
 
 const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.01, 100);
 
 // --- Lighting -------------------------------------------------------------
-const key = new THREE.DirectionalLight(0xfff2e3, 2.6);
+const key = new THREE.DirectionalLight(0xfff2e3, 1.45);
 key.position.set(2.5, 4.5, 3.5);
 key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
@@ -47,10 +47,10 @@ key.shadow.camera.top = 1.6; key.shadow.camera.bottom = -1.6;
 key.shadow.bias = -0.0002;
 key.shadow.radius = 5;
 scene.add(key);
-const rim = new THREE.DirectionalLight(0x9db8ff, 0.9);
+const rim = new THREE.DirectionalLight(0x9db8ff, 0.55);
 rim.position.set(-3, 2.2, -2.5);
 scene.add(rim);
-const fill = new THREE.AmbientLight(0x404550, 0.35);
+const fill = new THREE.AmbientLight(0x404550, 0.22);
 scene.add(fill);
 
 // --- Studio floor ----------------------------------------------------------
@@ -113,6 +113,8 @@ const VIEWS = {
   drivetrain: { pos: [0.32, 0.32, 0.78], tgt: [-0.05, 0.30, 0] },
   derailleur: { pos: [-0.36, 0.30, 0.52], tgt: [-0.41, 0.28, 0.03] },
   front:      { pos: [2.6, 0.62, 0.9], tgt: [0.3, 0.55, 0] },
+  chain:      { pos: [0.05, 0.24, 1.05], tgt: [-0.12, 0.26, 0] },
+  brake:      { pos: [0.95, 0.75, 0.55], tgt: [0.66, 0.64, 0] },
 };
 
 const camTween = { active: false, t: 0, fromP: new THREE.Vector3(), toP: new THREE.Vector3(), fromT: new THREE.Vector3(), toT: new THREE.Vector3() };
@@ -279,7 +281,16 @@ window.addEventListener('resize', () => {
 });
 
 // --- Headless screenshot API ---------------------------------------------------
+window.__appScene = scene;
+window.__appCamera = camera;
+window.__appControls = controls;
 window.__app = {
+  lookAt: (px, py, pz, tx, ty, tz) => {
+    camera.position.set(px, py, pz);
+    controls.target.set(tx, ty, tz);
+    controls.update();
+    renderer.render(scene, camera);
+  },
   ready: true,
   setView: (name) => setView(name, true),
   setCrank: (a) => { state.crankAngle = a; step(0.001); renderer.render(scene, camera); },

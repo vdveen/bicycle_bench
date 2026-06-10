@@ -160,21 +160,36 @@ export function buildDrivetrain(M, rearWheelSpin) {
   plate1.lookAt(pKnuckle);
   rd.add(plate1);
 
-  // Cage: two plates joining G and T, pulleys between them
+  // Cage: two contoured plates joining G and T, pulleys sandwiched between
   const cageDir = T.clone().sub(G);
-  const cageLen = cageDir.length() + 0.055;
-  const cageMid = G.clone().lerp(T, 0.5);
+  const cageAngle = Math.atan2(cageDir.y, cageDir.x);
+  const cageL = cageDir.length();
   const jockeys = [];
-  for (const zoff of [0.0065, -0.0065]) {
-    const plate = new THREE.Mesh(new THREE.BoxGeometry(0.030, cageLen, 0.0028), M.crank);
-    plate.position.copy(cageMid).add(new THREE.Vector3(0, 0, zoff));
-    plate.rotation.z = Math.atan2(cageDir.y, cageDir.x) + Math.PI / 2;
+  const plateShape = new THREE.Shape();
+  // Rounded dog-bone plate in local coords: G at (0,0), T at (cageL, 0)
+  plateShape.absarc(0, 0, 0.0165, Math.PI / 2, -Math.PI / 2, false);
+  plateShape.lineTo(cageL, -0.0145);
+  plateShape.absarc(cageL, 0, 0.0145, -Math.PI / 2, Math.PI / 2, false);
+  plateShape.lineTo(0, 0.0165);
+  const plateGeo = new THREE.ExtrudeGeometry(plateShape, { depth: 0.0022, bevelEnabled: false });
+  for (const zoff of [0.0068, -0.0068]) {
+    const plate = new THREE.Mesh(plateGeo, M.crank);
+    plate.position.copy(G).add(new THREE.Vector3(0, 0, zoff - 0.0011));
+    plate.rotation.z = cageAngle;
     rd.add(plate);
   }
   for (const centre of [G, T]) {
-    const jw = new THREE.Mesh(sprocketGeometry(11, 0.0036, { holeR: 0.005, toothDepth: 0.0036 }), M.black);
+    const jw = new THREE.Mesh(sprocketGeometry(11, 0.0040, { holeR: 0.0045, toothDepth: 0.0034 }), M.darkSteel);
     jw.position.copy(centre);
     rd.add(jw);
+    const hubCap = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.0055, 12), M.black);
+    hubCap.rotation.x = Math.PI / 2;
+    hubCap.position.copy(centre);
+    rd.add(hubCap);
+    const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.0028, 0.0028, 0.016, 10), M.steel);
+    bolt.rotation.x = Math.PI / 2;
+    bolt.position.copy(centre);
+    rd.add(bolt);
     jockeys.push(jw);
   }
 

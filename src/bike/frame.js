@@ -158,7 +158,8 @@ function addDecals(g, M) {
   const angle = Math.atan2(dtDir.y, dtDir.x);
   for (const side of [1, -1]) {
     const mat = new THREE.MeshStandardMaterial({
-      map: tex, transparent: true, metalness: 0.3, roughness: 0.4,
+      map: tex, transparent: true, metalness: 0.0, roughness: 0.45,
+      emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.18,
       polygonOffset: true, polygonOffsetFactor: -2,
     });
     const plane = new THREE.Mesh(new THREE.PlaneGeometry(0.30, 0.0375), mat);
@@ -181,9 +182,9 @@ function addDecals(g, M) {
   badge.lookAt(badge.position.clone().add(new THREE.Vector3(1, 0.33, 0)));
   g.add(badge);
 
-  // Seat tube accent band (red)
-  const band = new THREE.Mesh(new THREE.CylinderGeometry(TUBES.seatTubeR + 0.0008, TUBES.seatTubeR + 0.0008, 0.035, 24), M.accent);
-  band.position.copy(BB).addScaledVector(SEAT_UP, 0.36);
+  // Seat tube accent band (red) — radius must clear the tube's taper there
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(0.0182, 0.0182, 0.030, 24), M.accent);
+  band.position.copy(BB).addScaledVector(SEAT_UP, 0.34);
   band.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), SEAT_UP);
   g.add(band);
 }

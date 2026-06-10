@@ -46,6 +46,10 @@ export function buildWheel(M, { rear = false } = {}) {
   group.add(spin);
   group.name = rear ? 'rearWheel' : 'frontWheel';
 
+  // Rear hubs are asymmetric: the drive-side flange sits inboard so the
+  // cassette (z ≈ 0.027..0.062) clears it.
+  const flangeZ = (side) => (rear && side > 0) ? 0.018 : side * WHEEL.hubFlangeZ;
+
   // --- Tire
   const tireCentreR = WHEEL.tireOuterR - WHEEL.tireTubeR;
   const tire = new THREE.Mesh(
@@ -68,12 +72,12 @@ export function buildWheel(M, { rear = false } = {}) {
     const flange = new THREE.Mesh(
       new THREE.CylinderGeometry(WHEEL.hubFlangeR, WHEEL.hubFlangeR, 0.004, 24), M.hub);
     flange.rotation.x = Math.PI / 2;
-    flange.position.z = side * WHEEL.hubFlangeZ;
+    flange.position.z = flangeZ(side);
     spin.add(flange);
     const cone = new THREE.Mesh(
       new THREE.CylinderGeometry(0.008, WHEEL.hubBodyR, 0.012, 16), M.hub);
     cone.rotation.x = side === 1 ? Math.PI / 2 : -Math.PI / 2;
-    cone.position.z = side * (WHEEL.hubFlangeZ + 0.008);
+    cone.position.z = flangeZ(side) + side * 0.008;
     spin.add(cone);
   }
   // Axle / skewer ends (don't spin, but visually indistinct — keep on group)
@@ -90,7 +94,7 @@ export function buildWheel(M, { rear = false } = {}) {
   const up = new THREE.Vector3(0, 1, 0);
 
   for (let side = 0; side < 2; side++) {
-    const zHub = (side === 0 ? 1 : -1) * WHEEL.hubFlangeZ;
+    const zHub = flangeZ(side === 0 ? 1 : -1);
     const zRim = (side === 0 ? 1 : -1) * 0.0018;
     for (let i = 0; i < perFlange; i++) {
       const hubA = (i / perFlange) * Math.PI * 2 + side * (Math.PI / perFlange);

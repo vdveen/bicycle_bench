@@ -6,7 +6,7 @@ import { LIVERY } from './geo.js';
 // weave, rubber. Procedural canvas textures keep everything dependency-free.
 // ---------------------------------------------------------------------------
 
-function canvasTexture(size, draw, repeatX = 1, repeatY = 1) {
+function canvasTexture(size, draw, repeatX = 1, repeatY = 1, srgb = false) {
   const c = document.createElement('canvas');
   c.width = c.height = size;
   draw(c.getContext('2d'), size);
@@ -14,6 +14,7 @@ function canvasTexture(size, draw, repeatX = 1, repeatY = 1) {
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
   tex.repeat.set(repeatX, repeatY);
   tex.anisotropy = 8;
+  if (srgb) tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 
@@ -55,7 +56,7 @@ function carbonTex() {
         ctx.fillRect(x * cell, y * cell, cell, cell);
       }
     }
-  }, 8, 8);
+  }, 8, 8, true);
 }
 
 // Subtle sidewall rubber grain
@@ -86,14 +87,17 @@ export function createMaterials() {
   });
 
   // Raw brushed aluminum (cassette, hub bodies, spoke nipples)
+  // NOTE: roughnessMap multiplies base roughness (map avg ≈ 0.4), so the
+  // base value here is intentionally high.
   M.brushedAlu = new THREE.MeshPhysicalMaterial({
-    color: 0xb8bdc2, metalness: 1.0, roughness: 0.42,
-    roughnessMap: brushed,
+    color: 0x53585d, metalness: 1.0, roughness: 1.0,
+    roughnessMap: brushed, envMapIntensity: 0.45,
   });
+  M.brushedAlu.userData.tag = 'brushedAlu';
 
   // Polished alloy (chain, brake pivots)
   M.steel = new THREE.MeshStandardMaterial({
-    color: LIVERY.chain, metalness: 1.0, roughness: 0.32,
+    color: 0x7a7f84, metalness: 1.0, roughness: 0.42, envMapIntensity: 0.6,
   });
 
   M.darkSteel = new THREE.MeshStandardMaterial({
@@ -102,8 +106,8 @@ export function createMaterials() {
 
   // Matte carbon (fork, seatpost)
   M.carbon = new THREE.MeshPhysicalMaterial({
-    color: 0xffffff, map: carbon, metalness: 0.15, roughness: 0.52,
-    clearcoat: 0.35, clearcoatRoughness: 0.55,
+    color: 0x6a6a6e, map: carbon, metalness: 0.1, roughness: 0.62,
+    clearcoat: 0.18, clearcoatRoughness: 0.6, envMapIntensity: 0.45,
   });
 
   // Crank / derailleur forged alloy, near-black anodised
@@ -113,7 +117,7 @@ export function createMaterials() {
   });
 
   M.chainring = new THREE.MeshStandardMaterial({
-    color: LIVERY.chainring, metalness: 0.9, roughness: 0.38,
+    color: LIVERY.chainring, metalness: 0.9, roughness: 0.55, envMapIntensity: 0.55,
   });
 
   // Tire rubber
@@ -138,7 +142,7 @@ export function createMaterials() {
   });
 
   M.hub = new THREE.MeshStandardMaterial({
-    color: LIVERY.hub, metalness: 0.95, roughness: 0.32,
+    color: 0x6d7277, metalness: 0.95, roughness: 0.42,
   });
 
   // Saddle / grips

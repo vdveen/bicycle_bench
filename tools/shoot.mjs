@@ -44,7 +44,7 @@ await page.goto(`http://127.0.0.1:${port}/index.html`);
 await page.waitForFunction(() => window.__app?.ready, { timeout: 20000 });
 await page.waitForTimeout(600); // let env map + first frames settle
 
-const views = ['hero', 'side', 'cockpit', 'drivetrain', 'derailleur', 'front'];
+const views = ['hero', 'side', 'cockpit', 'drivetrain', 'derailleur', 'front', 'chain', 'brake'];
 for (const v of views) {
   await page.evaluate((name) => {
     window.__app.setView(name);
@@ -57,7 +57,7 @@ for (const v of views) {
 }
 
 // Brake squeeze detail for verification
-await page.evaluate(() => { window.__app.setView('front'); window.__app.setBrake(1); });
+await page.evaluate(() => { window.__app.setView('brake'); window.__app.setBrake(1); });
 await page.waitForTimeout(100);
 await page.screenshot({ path: path.join(root, 'shots', 'brake-squeezed.png') });
 
