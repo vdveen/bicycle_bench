@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Koga F3 — Three.js</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: #0e0f11; height: 100%; }
+    #app { width: 100%; height: 100%; }
+    #hud {
+      position: fixed; top: 14px; left: 14px; color: #d8d8d8;
+      font-family: 'Helvetica Neue', Arial, sans-serif; user-select: none;
+      pointer-events: none;
+    }
+    #hud h1 { font-size: 15px; letter-spacing: 3px; margin: 0 0 2px; font-weight: 700; }
+    #hud h1 span { color: #e63329; }
+    #hud p { font-size: 11px; margin: 0; opacity: 0.65; line-height: 1.5; }
+    #views {
+      position: fixed; bottom: 14px; left: 14px; display: flex; gap: 6px;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+    #views button {
+      background: rgba(30,32,36,0.85); color: #cfcfcf; border: 1px solid #3a3d42;
+      border-radius: 4px; padding: 6px 10px; font-size: 11px; cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+    #views button:hover { background: #2d3036; color: #fff; }
+    #brakehint {
+      position: fixed; bottom: 14px; right: 14px; color: #9a9a9a;
+      font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px;
+      text-align: right; line-height: 1.6; user-select: none; pointer-events: none;
+    }
+  </style>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./node_modules/three/build/three.module.js",
+        "three/addons/": "./node_modules/three/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="hud">
+    <h1>KOGA <span>F3</span></h1>
+    <p>Drag pedals to crank &middot; Shift+move mouse to steer &middot; Hold B (or right-click) to brake<br>
+       Keys 1–4: side / cockpit / drivetrain / rear derailleur &middot; 0: free orbit</p>
+  </div>
+  <div id="views">
+    <button data-view="side">SIDE</button>
+    <button data-view="cockpit">COCKPIT</button>
+    <button data-view="drivetrain">DRIVETRAIN</button>
+    <button data-view="derailleur">DERAILLEUR</button>
+    <button data-view="hero">HERO</button>
+  </div>
+  <div id="brakehint">KOGA F3 &mdash; full-suspension of disbelief not included</div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

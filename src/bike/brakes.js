@@ -1,0 +1,132 @@
+import * as THREE from 'three';
+import {
+  REAR_AXLE, SS_TOP, TT_FRONT, TT_REAR, HEAD_TUBE_TOP, STEER_UP, FORK_OFFSET,
+  WHEEL, curveTube,
+} from './geo.js';
+
+// ---------------------------------------------------------------------------
+// Dual-pivot road calipers (front on the fork crown, rear on the seatstay
+// bridge) with pads on the brake track, plus full cable runs from the levers.
+// squeeze(t) closes the pads; t in [0,1].
+// ---------------------------------------------------------------------------
+
+// Caliper local frame: origin at mounting bolt, -Y points at the axle,
+// wheel plane is z = 0.
+function buildCaliper(M) {
+  const grp = new THREE.Group();
+  const arms = [];
+
+  // Mounting bolt + spring barrel
+  const bolt = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.030, 12), M.steel);
+  bolt.rotation.x = Math.PI / 2;
+  grp.add(bolt);
+  const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.0105, 0.0105, 0.016, 14), M.crank);
+  barrel.rotation.x = Math.PI / 2;
+  barrel.position.z = 0.004;
+  grp.add(barrel);
+
+  for (const side of [1, -1]) {
+    // Each arm pivots a few degrees about Z when squeezed
+    const arm = new THREE.Group();
+    grp.add(arm);
+    const tube = curveTube([
+      new THREE.Vector3(0, 0.012, side * 0.006),
+      new THREE.Vector3(side * 0.020, 0.000, side * 0.020),
+      new THREE.Vector3(side * 0.030, -0.022, side * 0.0235),
+      new THREE.Vector3(side * 0.016, -0.040, side * 0.016),
+    ], 0.0062, M.crank, 24, 10);
+    tube.scale.x = 1.15;
+    arm.add(tube);
+    // Pad holder + pad
+    const pad = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.014, 0.0045), M.black);
+    pad.position.set(side * 0.012, -0.047, side * 0.0135);
+    arm.add(pad);
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.016, 0.002), M.steel);
+    shoe.position.set(side * 0.012, -0.047, side * 0.0165);
+    arm.add(shoe);
+    arms.push(arm);
+  }
+
+  // Cable pinch arm + barrel adjuster on the drive-side arm top
+  const adj = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, 0.014, 10), M.steel);
+  adj.position.set(-0.012, 0.020, 0.006);
+  grp.add(adj);
+
+  function squeeze(t) {
+    arms[0].rotation.z = -t * 0.045;
+    arms[1].rotation.z = t * 0.045;
+  }
+  return { grp, squeeze };
+}
+
+export function buildBrakes(M, steerGroup, axleLocal, leverPivots) {
+  const world = new THREE.Group();
+  world.name = 'brakes';
+
+  // --- Front caliper: mounted ahead of the fork crown, steers with the fork
+  const front = buildCaliper(M);
+  front.grp.position.set(FORK_OFFSET, axleLocal.y + 0.360, 0);
+  steerGroup.add(front.grp);
+
+  // --- Rear caliper: on a seatstay bridge above the tire
+  const rear = buildCaliper(M);
+  const toCluster = SS_TOP.clone().sub(REAR_AXLE).normalize();
+  const rearBolt = REAR_AXLE.clone().addScaledVector(toCluster, 0.360);
+  rear.grp.position.copy(rearBolt);
+  // Rotate so local -Y points at the axle
+  const down = REAR_AXLE.clone().sub(rearBolt).normalize();
+  rear.grp.quaternion.setFromUnitVectors(new THREE.Vector3(0, -1, 0), down);
+  world.add(rear.grp);
+
+  // Seatstay bridge
+  const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.062, 10), M.frame);
+  bridge.position.copy(rearBolt).addScaledVector(toCluster, 0.012);
+  bridge.rotation.x = Math.PI / 2;
+  world.add(bridge);
+
+  // --- Cables -------------------------------------------------------------
+  // Front: left lever -> sweeping arc down in front of the head tube ->
+  // front caliper. Lives in the steering frame so it turns with the bars.
+  const frontAnchor = leverPivots[1].userData.cableAnchorLocal; // left side (-z)
+  const frontCable = curveTube([
+    frontAnchor.clone(),
+    frontAnchor.clone().add(new THREE.Vector3(0.035, -0.045, 0.01)),
+    new THREE.Vector3(0.046, 0.10, -0.012),
+    new THREE.Vector3(0.030, 0.024, -0.004),
+    front.grp.position.clone().add(new THREE.Vector3(-0.011, 0.030, 0.006)),
+  ], 0.0023, M.cable, 40, 8);
+  steerGroup.add(frontCable);
+
+  // Rear: right lever -> along the top tube -> seat cluster -> rear caliper.
+  // Built in world space at neutral steering.
+  const steerPos = steerGroup.position;
+  const rightAnchorWorld = leverPivots[0].userData.cableAnchorLocal.clone()
+    .applyQuaternion(steerGroup.quaternion).add(steerPos);
+  const ttDir = TT_REAR.clone().sub(TT_FRONT).normalize();
+  const rearCable = curveTube([
+    rightAnchorWorld,
+    rightAnchorWorld.clone().add(new THREE.Vector3(0.02, -0.06, 0.012)),
+    TT_FRONT.clone().add(new THREE.Vector3(0.012, 0.018, 0.014)),
+    TT_FRONT.clone().lerp(TT_REAR, 0.5).add(new THREE.Vector3(0, 0.016, 0.013)),
+    TT_REAR.clone().add(new THREE.Vector3(0.005, 0.014, 0.010)),
+    rearBolt.clone().add(new THREE.Vector3(-0.005, 0.055, 0.008)),
+    rearBolt.clone().add(new THREE.Vector3(-0.011, 0.028, 0.005)),
+  ], 0.0023, M.cable, 56, 8);
+  world.add(rearCable);
+
+  // Housing guides on the top tube
+  for (const t of [0.18, 0.5, 0.82]) {
+    const guide = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.004, 0.006), M.black);
+    guide.position.copy(TT_FRONT).lerp(TT_REAR, t).add(new THREE.Vector3(0, 0.014, 0.011));
+    guide.rotation.z = Math.atan2(ttDir.y, ttDir.x);
+    world.add(guide);
+  }
+
+  world.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+  steerGroup.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+
+  return {
+    group: world,
+    squeeze(t) { front.squeeze(t); rear.squeeze(t); },
+  };
+}
