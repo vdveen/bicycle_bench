@@ -53,7 +53,7 @@ export function buildWheel(M, { rear = false } = {}) {
   // --- Tire
   const tireCentreR = WHEEL.tireOuterR - WHEEL.tireTubeR;
   const tire = new THREE.Mesh(
-    new THREE.TorusGeometry(tireCentreR, WHEEL.tireTubeR, 22, 96), M.tire);
+    new THREE.TorusGeometry(tireCentreR, WHEEL.tireTubeR, 30, 140), M.tire);
   tire.castShadow = true;
   spin.add(tire);
 

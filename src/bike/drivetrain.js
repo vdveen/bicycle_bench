@@ -211,22 +211,26 @@ export function buildDrivetrain(M, rearWheelSpin) {
   fdClamp.position.copy(clampPos);
   fdClamp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), SEAT_UP);
   fd.add(fdClamp);
-  // Cage plates: arc following the ring, straddling the chain
+  // Cage plates: stamped-steel annular arcs straddling the chain's top run
   const cageCentre = new THREE.Vector3(BB.x - 0.024, BB.y + CHAINRING_R + 0.011, CHAINLINE_Z);
-  for (const zoff of [0.0105, -0.0075]) {
-    const pts = [];
-    for (let i = 0; i <= 8; i++) {
-      const a = Math.PI * 0.42 + (i / 8) * Math.PI * 0.40;
-      pts.push(new THREE.Vector3(
-        BB.x + Math.cos(a) * (CHAINRING_R + 0.013),
-        BB.y + Math.sin(a) * (CHAINRING_R + 0.013) + 0.002,
-        CHAINLINE_Z + zoff));
-    }
-    const plate = curveTube(pts, 0.0024, M.steel, 16, 8);
-    plate.scale.set(1, 1, 1);
+  const arc0 = Math.PI * 0.38, arc1 = Math.PI * 0.86;
+  for (const [zoff, h] of [[0.0105, 0.024], [-0.0075, 0.019]]) {
+    const sh = new THREE.Shape();
+    const rIn = CHAINRING_R + 0.006, rOut = rIn + h;
+    sh.absarc(0, 0, rOut, arc0, arc1, false);
+    sh.absarc(0, 0, rIn, arc1, arc0, true);
+    sh.closePath();
+    const plate = new THREE.Mesh(
+      new THREE.ExtrudeGeometry(sh, { depth: 0.0016, bevelEnabled: false }), M.steel);
+    plate.position.set(BB.x, BB.y + 0.002, CHAINLINE_Z + zoff);
     fd.add(plate);
   }
-  const fdLink = curveTube([clampPos.clone().add(new THREE.Vector3(0.01, 0, 0.01)), cageCentre.clone().add(new THREE.Vector3(0.01, 0.01, 0))], 0.006, M.crank, 8, 8);
+  // Cage bridge + link body back to the clamp
+  const bridge = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.012, 0.020), M.steel);
+  bridge.position.set(BB.x + Math.cos(arc1 - 0.06) * (CHAINRING_R + 0.016),
+    BB.y + Math.sin(arc1 - 0.06) * (CHAINRING_R + 0.016), CHAINLINE_Z + 0.0015);
+  fd.add(bridge);
+  const fdLink = curveTube([clampPos.clone().add(new THREE.Vector3(0.01, 0, 0.01)), cageCentre.clone().add(new THREE.Vector3(0.005, 0.012, 0))], 0.006, M.crank, 8, 8);
   fd.add(fdLink);
 
   group.traverse((o) => { if (o.isMesh) o.castShadow = true; });

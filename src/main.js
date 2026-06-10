@@ -47,16 +47,19 @@ key.shadow.camera.top = 1.6; key.shadow.camera.bottom = -1.6;
 key.shadow.bias = -0.0002;
 key.shadow.radius = 5;
 scene.add(key);
-const rim = new THREE.DirectionalLight(0x9db8ff, 0.55);
+const rim = new THREE.DirectionalLight(0x9db8ff, 0.85);
 rim.position.set(-3, 2.2, -2.5);
 scene.add(rim);
+const kicker = new THREE.DirectionalLight(0xffe8d0, 0.4);
+kicker.position.set(-1.5, 0.8, 3.2);
+scene.add(kicker);
 const fill = new THREE.AmbientLight(0x404550, 0.22);
 scene.add(fill);
 
 // --- Studio floor ----------------------------------------------------------
 const floor = new THREE.Mesh(
   new THREE.CircleGeometry(9, 64),
-  new THREE.MeshStandardMaterial({ color: 0x1a1c1f, roughness: 0.9, metalness: 0.05 }));
+  new THREE.MeshStandardMaterial({ color: 0x232629, roughness: 0.85, metalness: 0.05 }));
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
@@ -220,7 +223,7 @@ function step(dtSec) {
   // Brakes
   state.brake = THREE.MathUtils.lerp(state.brake, state.brakeTarget, 1 - Math.pow(0.0001, dtSec));
   if (state.brake > 0.02) {
-    const decel = 1 - state.brake * 4.5 * dtSec;
+    const decel = 1 - state.brake * 8.0 * dtSec;
     state.wheelVel *= Math.max(0, decel);
     if (state.autopedal) state.autopedal = false;
   }
@@ -305,4 +308,16 @@ window.__app = {
   setBrake: (t) => { state.brake = t; state.brakeTarget = t; brakes.squeeze(t); leverPivots[0].rotation.z = -t * 0.3; leverPivots[1].rotation.z = -t * 0.3; renderer.render(scene, camera); },
   autopedal: (on) => { state.autopedal = on; },
   renderOnce: () => { step(0.016); controls.update(); renderer.render(scene, camera); },
+  getState: () => ({ ...state }),
+  resetMotion: () => {
+    state.crankVel = 0; state.wheelVel = 0; state.brake = 0; state.brakeTarget = 0;
+    state.autopedal = false;
+  },
+  // screen-space position of the drive-side pedal centre (for input tests)
+  pedalScreenPos: () => {
+    const p = new THREE.Vector3();
+    dt.pedals[0].pedal.getWorldPosition(p);
+    p.project(camera);
+    return { x: (p.x + 1) / 2 * window.innerWidth, y: (1 - p.y) / 2 * window.innerHeight };
+  },
 };

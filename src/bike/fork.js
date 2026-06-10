@@ -149,7 +149,7 @@ export function buildSteering(M) {
 
   // Bar end plugs
   for (const side of [1, -1]) {
-    const plug = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.0125, 0.004, 14), M.accent);
+    const plug = new THREE.Mesh(new THREE.CylinderGeometry(0.0125, 0.0125, 0.004, 14), M.black);
     plug.rotation.x = Math.PI / 2;
     plug.position.copy(barPts[side === 1 ? 6 : 0]).add(new THREE.Vector3(0, 0, side * 0.002));
     steer.add(plug);

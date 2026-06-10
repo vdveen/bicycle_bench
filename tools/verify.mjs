@@ -38,6 +38,11 @@ const shots = [
   // ultra-closeup pad gap A/B
   ['pads-open', () => { window.__app.setBrake(0); window.__app.lookAt(-0.05, 0.70, 0.10, -0.185, 0.605, 0); }],
   ['pads-closed', () => { window.__app.setBrake(1); window.__app.lookAt(-0.05, 0.70, 0.10, -0.185, 0.605, 0); }],
+  // lever blade pull A/B from outside the right grip
+  ['lever-open', () => { window.__app.setBrake(0); window.__app.lookAt(0.78, 0.98, 0.42, 0.50, 0.87, 0.18); }],
+  ['lever-pulled', () => { window.__app.setBrake(1); window.__app.lookAt(0.78, 0.98, 0.42, 0.50, 0.87, 0.18); }],
+  // front derailleur cage
+  ['fd-cage', () => { window.__app.setBrake(0); window.__app.lookAt(0.28, 0.52, 0.55, -0.02, 0.39, 0.04); }],
 ];
 for (const [name, fn] of shots) {
   await page.evaluate(fn);

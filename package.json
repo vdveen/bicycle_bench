@@ -1,10 +1,12 @@
 {
-  "name": "bicycle_bench",
+  "name": "koga-f3-threejs",
   "version": "1.0.0",
-  "description": "",
+  "description": "Fully modeled, animated, interactive Koga F3 bicycle in Three.js",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "python3 -m http.server 8000",
+    "shoot": "node tools/shoot.mjs",
+    "verify": "node tools/verify.mjs"
   },
   "repository": {
     "type": "git",
@@ -18,5 +20,6 @@
   },
   "devDependencies": {
     "playwright": "^1.56.1"
-  }
+  },
+  "type": "module"
 }
