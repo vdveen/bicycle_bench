@@ -4,7 +4,7 @@ A fully modeled, animated, interactive Koga F3 fitness/road bike built from
 scratch in Three.js. No external models or textures — every component is
 procedural geometry and canvas-generated PBR textures.
 
-![hero](iterations/iter_008_brakes-fixed.png)
+![hero](iterations/iter_012_chain-tone.png)
 
 ## Run it
 

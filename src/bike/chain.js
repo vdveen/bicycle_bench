@@ -105,7 +105,7 @@ export function buildChain(M, pulleyCentres) {
   pinGeo.rotateX(Math.PI / 2);
 
   const half = Math.ceil(linkCount / 2);
-  const outerPlates = new THREE.InstancedMesh(plateGeo, M.steel, half * 2);
+  const outerPlates = new THREE.InstancedMesh(plateGeo, M.darkSteel, half * 2);
   const innerPlates = new THREE.InstancedMesh(plateGeo, M.darkSteel, half * 2);
   const rollers = new THREE.InstancedMesh(rollerGeo, M.darkSteel, linkCount);
   const pins = new THREE.InstancedMesh(pinGeo, M.steel, linkCount);

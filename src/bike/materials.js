@@ -91,7 +91,7 @@ export function createMaterials() {
   // base value here is intentionally high.
   M.brushedAlu = new THREE.MeshPhysicalMaterial({
     color: 0x53585d, metalness: 1.0, roughness: 1.0,
-    roughnessMap: brushed, envMapIntensity: 0.45,
+    roughnessMap: brushed, envMapIntensity: 0.32,
   });
   M.brushedAlu.userData.tag = 'brushedAlu';
 
