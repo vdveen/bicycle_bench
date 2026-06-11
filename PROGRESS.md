@@ -57,11 +57,17 @@ vision-verified screenshots in `./iterations/`.
 - iter_012: chain plates unified to dark steel (continuous band look).
 - iter_013: cassette env gleam softened. FINAL for this pass.
 
-## Status: COMPLETE (13 iterations, all goal items verified)
-All goal requirements implemented and vision/test-verified. If resuming for
-further polish, candidate ideas: saddle shell sculpting, cable housing ferrule
-details, head badge emboss, spoke crossing interleave (over/under), tire tread
-pattern, HDR backdrop.
+- iter_014: saddle rebuilt as sculpted parametric shell (waisted plan form,
+  domed cross-section, dipped topline, kicked tail, dark under-shell, clamp head).
+- iter_015: tire file-tread bump (slick centre + shoulder dashes), drive-side
+  rubber chainstay protector, cable ferrules at lever/caliper housing ends.
+- iter_016: studio cyclorama backdrop (gradient cylinder) + radial-faded floor.
+  Regression: input tests 6/6 PASS.
+
+## Status: COMPLETE (16 iterations, all goal items verified)
+All goal requirements implemented and vision/test-verified. Remaining nice-to-
+haves if ever resumed: head badge emboss, spoke over/under interleave at the
+crossings, brake housing segments w/ ferrule shoulders, painted lug shading.
 
 ## How to resume
 1. `npm install` (three + playwright; chromium at /opt/pw-browsers)

@@ -72,6 +72,35 @@ function rubberBumpTex() {
   }, 12, 3);
 }
 
+// File-tread: slick centre strip + fine diagonal dashes on the shoulders.
+// Torus UVs: x repeats around the wheel, y around the casing.
+function treadBumpTex() {
+  return canvasTexture(128, (ctx, s) => {
+    ctx.fillStyle = '#808080';
+    ctx.fillRect(0, 0, s, s);
+    // y in [0,1] maps around the tube; the contact patch band ~0.35..0.65
+    ctx.strokeStyle = '#9a9a9a';
+    ctx.lineWidth = 3;
+    for (const [y0, y1] of [[0.20 * s, 0.42 * s], [0.58 * s, 0.80 * s]]) {
+      for (let x = -s * 0.25; x < s * 1.25; x += s * 0.25) {
+        ctx.beginPath();
+        ctx.moveTo(x, y0);
+        ctx.lineTo(x + s * 0.18, y1);
+        ctx.stroke();
+      }
+    }
+    // slick centre seam
+    ctx.fillStyle = '#8c8c8c';
+    ctx.fillRect(0, 0.475 * s, s, 0.05 * s);
+    // grain
+    for (let i = 0; i < 1500; i++) {
+      const v = 110 + Math.random() * 36 | 0;
+      ctx.fillStyle = `rgb(${v},${v},${v})`;
+      ctx.fillRect(Math.random() * s, Math.random() * s, 1.2, 1.2);
+    }
+  }, 110, 1);
+}
+
 export function createMaterials() {
   const brushed = brushedRoughnessTex();
   const carbon = carbonTex();
@@ -120,10 +149,10 @@ export function createMaterials() {
     color: LIVERY.chainring, metalness: 0.9, roughness: 0.55, envMapIntensity: 0.55,
   });
 
-  // Tire rubber
+  // Tire rubber with file tread on the shoulders
   M.tire = new THREE.MeshStandardMaterial({
     color: LIVERY.tire, metalness: 0.0, roughness: 0.96,
-    bumpMap: rubberBump, bumpScale: 0.4,
+    bumpMap: treadBumpTex(), bumpScale: 0.7,
   });
   M.tireWall = new THREE.MeshStandardMaterial({
     color: LIVERY.tireWall, metalness: 0.0, roughness: 0.92,

@@ -114,6 +114,19 @@ export function buildBrakes(M, steerGroup, axleLocal, leverPivots) {
   ], 0.0023, M.cable, 56, 8);
   world.add(rearCable);
 
+  // Cable ferrules: small alloy caps where housing meets lever/caliper
+  const ferruleGeo = new THREE.CylinderGeometry(0.0032, 0.0032, 0.007, 10);
+  const addFerrule = (parent, pos, dir) => {
+    const f = new THREE.Mesh(ferruleGeo, M.steel);
+    f.position.copy(pos);
+    f.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+    parent.add(f);
+  };
+  addFerrule(steerGroup, frontAnchor.clone().add(new THREE.Vector3(0.004, -0.004, 0)), new THREE.Vector3(0.5, -0.8, 0));
+  addFerrule(steerGroup, front.grp.position.clone().add(new THREE.Vector3(-0.011, 0.027, 0.006)), new THREE.Vector3(0.2, 1, -0.1));
+  addFerrule(world, rightAnchorWorld.clone().add(new THREE.Vector3(0.004, -0.006, 0.002)), new THREE.Vector3(0.3, -0.9, 0.1));
+  addFerrule(world, rearBolt.clone().add(new THREE.Vector3(-0.010, 0.026, 0.005)), new THREE.Vector3(0.2, 1, 0.1));
+
   // Housing guides on the top tube
   for (const t of [0.18, 0.5, 0.82]) {
     const guide = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.004, 0.006), M.black);

@@ -5,6 +5,7 @@ import {
   taperedTube, curveTube,
 } from './geo.js';
 import { kogaDecalTexture, f3BadgeTexture } from './materials.js';
+import { ParametricGeometry } from 'three/addons/geometries/ParametricGeometry.js';
 
 // ---------------------------------------------------------------------------
 // Frame: main triangle + rear triangle, hydroformed double-butted alloy look.
@@ -68,6 +69,16 @@ export function buildFrame(M) {
       REAR_AXLE.clone().add(new THREE.Vector3(0.012, 0.002, side * 0.030)),
     ], TUBES.chainstayR0, M.frame, 40, 14);
     g.add(stay);
+
+    // Rubber chainstay protector on the drive side (sleeve over the stay)
+    if (side === 1) {
+      const guard = curveTube([
+        new THREE.Vector3(-0.09, 0.286, 0.041),
+        new THREE.Vector3(-0.19, 0.302, 0.045),
+        new THREE.Vector3(-0.295, 0.319, 0.0355),
+      ], TUBES.chainstayR0 + 0.0022, M.grip, 24, 12);
+      g.add(guard);
+    }
 
     // Seatstays: slim, slightly arced
     const ss = curveTube([
@@ -145,26 +156,54 @@ function buildDropout(M) {
 
 function buildSaddle(M) {
   const grp = new THREE.Group();
-  // Saddle shell: lathe-ish shape via scaled sphere halves; nose forward +X
-  const shellGeo = new THREE.SphereGeometry(0.5, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2);
+  const smooth = (a, b, x) => {
+    const t = THREE.MathUtils.clamp((x - a) / (b - a), 0, 1);
+    return t * t * (3 - 2 * t);
+  };
+  // Sculpted shell: u runs nose(0)→tail(1), v runs across (-1..1).
+  const LEN = 0.272, NOSE_X = 0.155;
+  const surface = (u, v, target) => {
+    v = v * 2 - 1;
+    const x = NOSE_X - u * LEN;
+    // plan form: slim nose, flared rear, rounded tip/tail
+    const flare = 0.020 + 0.048 * smooth(0.45, 0.82, u);
+    const tipCap = Math.sqrt(Math.max(0.04, 1 - Math.pow((u - 0.5) / 0.52, 2)));
+    const halfW = flare * tipCap;
+    // topline: nose up, mid dip, tail kick
+    const topline = 0.004 * smooth(0.25, 0, u) - 0.005 * Math.sin(Math.PI * smooth(0.15, 0.75, u))
+      + 0.012 * smooth(0.75, 1.0, u);
+    // cross-section: domed centre, edges curl down harder at the rear
+    const edgeDrop = 0.005 + 0.011 * smooth(0.4, 0.9, u);
+    const y = topline - edgeDrop * v * v;
+    target.set(x, y, halfW * v);
+  };
+  const shellGeo = new ParametricGeometry(surface, 36, 16);
   const shell = new THREE.Mesh(shellGeo, M.saddle);
-  shell.scale.set(0.135, 0.026, 0.062);
-  shell.position.copy(SADDLE_POS).add(new THREE.Vector3(-0.01, 0.012, 0));
+  shell.material = M.saddle.clone();
+  shell.material.side = THREE.DoubleSide;
+  shell.position.copy(SADDLE_POS).add(new THREE.Vector3(0.012, 0.018, 0));
+  shell.castShadow = true;
   grp.add(shell);
-  // Nose extension
-  const nose = new THREE.Mesh(new THREE.SphereGeometry(0.5, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), M.saddle);
-  nose.scale.set(0.115, 0.02, 0.030);
-  nose.position.copy(SADDLE_POS).add(new THREE.Vector3(0.055, 0.011, 0));
-  grp.add(nose);
+  // Under-shell: same surface nudged down, dark plastic base
+  const under = new THREE.Mesh(shellGeo.clone(), M.black);
+  under.material = M.black.clone();
+  under.material.side = THREE.DoubleSide;
+  under.position.copy(shell.position).add(new THREE.Vector3(0, -0.0045, 0));
+  under.scale.set(0.97, 1, 0.94);
+  grp.add(under);
   // Rails
   for (const side of [1, -1]) {
     const rail = curveTube([
-      SADDLE_POS.clone().add(new THREE.Vector3(0.09, 0.006, side * 0.014)),
+      SADDLE_POS.clone().add(new THREE.Vector3(0.115, 0.010, side * 0.012)),
       SADDLE_POS.clone().add(new THREE.Vector3(0.01, -0.012, side * 0.020)),
-      SADDLE_POS.clone().add(new THREE.Vector3(-0.09, 0.004, side * 0.020)),
+      SADDLE_POS.clone().add(new THREE.Vector3(-0.085, 0.006, side * 0.020)),
     ], 0.0035, M.steel, 16, 8);
     grp.add(rail);
   }
+  // Seatpost clamp head
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.018, 0.030), M.darkSteel);
+  head.position.copy(SADDLE_POS).add(new THREE.Vector3(0, -0.012, 0));
+  grp.add(head);
   return grp;
 }
 

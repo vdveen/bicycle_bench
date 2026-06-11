@@ -56,13 +56,38 @@ scene.add(kicker);
 const fill = new THREE.AmbientLight(0x404550, 0.22);
 scene.add(fill);
 
-// --- Studio floor ----------------------------------------------------------
+// --- Studio floor + backdrop sweep ------------------------------------------
+function gradientTex(stops, vertical = true) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const ctx = c.getContext('2d');
+  const g = vertical
+    ? ctx.createLinearGradient(0, 256, 0, 0)
+    : ctx.createRadialGradient(128, 128, 10, 128, 128, 128);
+  for (const [t, col] of stops) g.addColorStop(t, col);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
 const floor = new THREE.Mesh(
   new THREE.CircleGeometry(9, 64),
-  new THREE.MeshStandardMaterial({ color: 0x232629, roughness: 0.85, metalness: 0.05 }));
+  new THREE.MeshStandardMaterial({
+    map: gradientTex([[0, '#2a2d31'], [0.55, '#1c1f22'], [1, '#101214']], false),
+    roughness: 0.85, metalness: 0.05,
+  }));
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
 scene.add(floor);
+const backdrop = new THREE.Mesh(
+  new THREE.CylinderGeometry(8.8, 8.8, 9, 48, 1, true),
+  new THREE.MeshBasicMaterial({
+    map: gradientTex([[0, '#202329'], [0.25, '#15171a'], [1, '#08090a']]),
+    side: THREE.BackSide, fog: false,
+  }));
+backdrop.position.y = 4.5;
+scene.add(backdrop);
 // Subtle ring accent on the floor
 const ring = new THREE.Mesh(
   new THREE.RingGeometry(1.18, 1.20, 96),
