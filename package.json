@@ -2,12 +2,13 @@
   "name": "koga-f3-threejs",
   "version": "1.0.0",
   "description": "Fully modeled, animated, interactive Koga F3 bicycle in Three.js",
-  "main": "index.js",
+  "main": "server.mjs",
   "scripts": {
-    "serve": "python3 -m http.server 8000",
+    "serve": "node server.mjs",
     "shoot": "node tools/shoot.mjs",
     "verify": "node tools/verify.mjs",
-    "test": "node tools/input-test.mjs"
+    "test": "node tools/input-test.mjs",
+    "start": "node server.mjs"
   },
   "repository": {
     "type": "git",

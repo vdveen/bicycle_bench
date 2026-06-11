@@ -10,8 +10,12 @@ procedural geometry and canvas-generated PBR textures.
 
 ```bash
 npm install
-npm run serve        # then open http://localhost:8000
+npm start            # then open http://localhost:8000 (honors $PORT)
 ```
+
+Deploys as-is to any Node host (Railway, Render, Fly...): `npm install`
++ `npm start` is the whole production setup — `server.mjs` serves the
+repo statically and binds `0.0.0.0:$PORT`.
 
 ## Controls
 
