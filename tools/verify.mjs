@@ -43,6 +43,9 @@ const shots = [
   ['lever-pulled', () => { window.__app.setBrake(1); window.__app.lookAt(0.78, 0.98, 0.42, 0.50, 0.87, 0.18); }],
   // front derailleur cage
   ['fd-cage', () => { window.__app.setBrake(0); window.__app.lookAt(0.28, 0.52, 0.55, -0.02, 0.39, 0.04); }],
+  // cassette clearance from the user's reported angle (rear drive side, low)
+  ['cassette-clear', () => { window.__app.setCrank(-0.6); window.__app.lookAt(-0.72, 0.30, 0.42, -0.40, 0.34, 0.03); }],
+  ['cassette-rear', () => { window.__app.lookAt(-0.85, 0.40, 0.18, -0.42, 0.34, 0.04); }],
   // saddle closeups
   ['saddle-side', () => { window.__app.lookAt(-0.62, 1.02, 0.55, -0.20, 0.93, 0); }],
   ['saddle-rear34', () => { window.__app.lookAt(-0.75, 1.12, -0.35, -0.18, 0.92, 0); }],

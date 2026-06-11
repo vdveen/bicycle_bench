@@ -80,8 +80,10 @@ export function buildWheel(M, { rear = false } = {}) {
     cone.position.z = flangeZ(side) + side * 0.008;
     spin.add(cone);
   }
-  // Axle / skewer ends (don't spin, but visually indistinct — keep on group)
-  const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, 0.135, 12), M.steel);
+  // Axle / skewer: rear OLD 130 mm reaches the wide dropouts (z ±0.071),
+  // front is a 100 mm fork
+  const axleHalf = rear ? 0.075 : 0.052;
+  const axle = new THREE.Mesh(new THREE.CylinderGeometry(0.0045, 0.0045, axleHalf * 2, 12), M.steel);
   axle.rotation.x = Math.PI / 2;
   group.add(axle);
 
@@ -133,14 +135,14 @@ export function buildWheel(M, { rear = false } = {}) {
   // --- Quick-release skewer: nut + curved lever on the non-drive side
   const qrNut = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.0078, 0.008, 12), M.darkSteel);
   qrNut.rotation.x = Math.PI / 2;
-  qrNut.position.z = 0.0712;
+  qrNut.position.z = axleHalf + 0.003;
   group.add(qrNut);
   const lever = new THREE.Mesh(new THREE.CapsuleGeometry(0.0042, 0.042, 4, 10), M.black);
-  lever.position.set(0.008, -0.025, -0.069);
+  lever.position.set(0.008, -0.025, -(axleHalf + 0.001));
   lever.rotation.z = 0.5;
   group.add(lever);
   const leverHead = new THREE.Mesh(new THREE.SphereGeometry(0.0085, 12, 10), M.black);
-  leverHead.position.set(-0.004, -0.003, -0.069);
+  leverHead.position.set(-0.004, -0.003, -(axleHalf + 0.001));
   leverHead.scale.set(1.2, 1, 0.7);
   group.add(leverHead);
 

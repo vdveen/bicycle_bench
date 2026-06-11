@@ -64,7 +64,21 @@ vision-verified screenshots in `./iterations/`.
 - iter_016: studio cyclorama backdrop (gradient cylinder) + radial-faded floor.
   Regression: input tests 6/6 PASS.
 
-## Status: COMPLETE (16 iterations, all goal items verified)
+- iter_017: USER-REPORTED FIXES —
+  (1) rear end widened to 130 mm OLD: dropouts z ±0.071, chain/seatstays flare
+      to ±0.069, axle/QR lengthened (front kept 100 mm) — no more stay/dropout
+      clipping through cassette; RD hanger moved outboard (z 0.0655).
+  (2) freehub corrected: cassette decoupled from wheel spin, now mounted at
+      the axle and rotated by the CRANK (cassette/chain/jockeys all pure
+      functions of crankAngle) — chain no longer clips through cogs when
+      coasting; jockey wheels spin with chain; crank stiction added.
+  (3) steering hygiene: Shift+move only steers with no buttons held (no more
+      phantom steering while braking/orbiting/pedal-dragging); bars
+      self-centre on Shift release.
+  input-test.mjs now 10 checks (coast decoupling, self-centre, no-phantom)
+  — 10/10 PASS.
+
+## Status: COMPLETE (17 iterations, all goal items verified)
 All goal requirements implemented and vision/test-verified. Remaining nice-to-
 haves if ever resumed: head badge emboss, spoke over/under interleave at the
 crossings, brake housing segments w/ ferrule shoulders, painted lug shading.

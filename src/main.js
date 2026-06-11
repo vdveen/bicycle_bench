@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 import {
-  FRONT_AXLE, REAR_AXLE, GEAR_RATIO, CHAINRING_R, WHEEL, BB, SADDLE_POS,
+  FRONT_AXLE, REAR_AXLE, GEAR_RATIO, CHAINRING_R, JOCKEY_R, WHEEL, BB, SADDLE_POS,
 } from './bike/geo.js';
 import { createMaterials } from './bike/materials.js';
 import { buildFrame } from './bike/frame.js';
@@ -117,8 +117,12 @@ bike.add(steer);
 frontWheel.group.position.copy(axleLocal);
 steer.add(frontWheel.group);
 
-const dt = buildDrivetrain(M, rearWheel.spin);
+const dt = buildDrivetrain(M);
 bike.add(dt.group);
+// Cassette rides on the freehub: positioned at the axle but rotated by the
+// chain (crank), not the wheel — it stops when you stop pedalling.
+dt.cassette.position.copy(REAR_AXLE);
+bike.add(dt.cassette);
 
 const chain = buildChain(M, dt.pulleys);
 bike.add(chain.group);
@@ -213,7 +217,9 @@ renderer.domElement.addEventListener('pointermove', (e) => {
     state.crankAngle += da;
     state.crankVel = THREE.MathUtils.clamp(da * 60, -18, 18);
     dragLastAngle = a;
-  } else if (e.shiftKey) {
+  } else if (e.shiftKey && e.buttons === 0) {
+    // Steer only on bare Shift+mouse-move: any held button means the user is
+    // orbiting, braking (right-click) or dragging — don't hijack that.
     state.steerTarget = -((e.clientX / window.innerWidth) * 2 - 1) * 0.55;
   }
 });
@@ -229,6 +235,8 @@ window.addEventListener('keydown', (e) => {
 });
 window.addEventListener('keyup', (e) => {
   if (e.key === 'b' || e.key === 'B') state.brakeTarget = 0;
+  // Self-centre the bars when steering mode (Shift) is released
+  if (e.key === 'Shift') state.steerTarget = 0;
 });
 
 // --- Simulation -----------------------------------------------------------------
@@ -236,7 +244,10 @@ function step(dtSec) {
   dtSec = Math.min(dtSec, 0.05);
 
   if (state.autopedal) state.crankVel = THREE.MathUtils.lerp(state.crankVel, -5.5, 0.04);
-  else if (!state.draggingPedal) state.crankVel *= Math.pow(0.45, dtSec); // pedal friction
+  else if (!state.draggingPedal) {
+    state.crankVel *= Math.pow(0.05, dtSec); // legs stop the cranks fast
+    if (Math.abs(state.crankVel) < 0.08) state.crankVel = 0; // stiction
+  }
 
   if (!state.draggingPedal) state.crankAngle += state.crankVel * dtSec;
 
@@ -254,10 +265,10 @@ function step(dtSec) {
   }
   state.wheelAngle += state.wheelVel * dtSec;
 
-  // Chain follows the crank (freehub: chain stationary while coasting)
-  if (state.crankVel < 0 || state.draggingPedal) {
-    state.chainOffset += -state.crankVel * CHAINRING_R * dtSec;
-  }
+  // Chain, cassette and jockey wheels are rigidly coupled to the crank
+  // (backpedalling runs them backwards; coasting freezes them while the
+  // wheel spins on the freehub ratchet)
+  state.chainOffset = -state.crankAngle * CHAINRING_R;
 
   // Steering + lean physics: lean into the turn, scaled by wheel speed
   state.steerAngle = THREE.MathUtils.lerp(state.steerAngle, state.steerTarget, 1 - Math.pow(0.002, dtSec));
@@ -273,6 +284,10 @@ function step(dtSec) {
   rearWheel.spin.rotation.z = state.wheelAngle;
   frontWheel.spin.rotation.z = state.wheelAngle;
   chain.update(state.chainOffset);
+  dt.cassette.rotation.z = state.crankAngle * GEAR_RATIO;
+  // jockey wheels spin with chain travel: guide ccw (+), tension cw (-)
+  dt.jockeys[0].rotation.z = state.chainOffset / JOCKEY_R;
+  dt.jockeys[1].rotation.z = -state.chainOffset / JOCKEY_R;
   steer.rotation.y = state.steerAngle;
   bikeRoot.rotation.x = state.lean;
 

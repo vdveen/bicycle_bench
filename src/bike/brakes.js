@@ -79,7 +79,7 @@ export function buildBrakes(M, steerGroup, axleLocal, leverPivots) {
   world.add(rear.grp);
 
   // Seatstay bridge
-  const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.062, 10), M.frame);
+  const bridge = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.048, 10), M.frame);
   bridge.position.copy(rearBolt).addScaledVector(toCluster, 0.012);
   bridge.rotation.x = Math.PI / 2;
   world.add(bridge);

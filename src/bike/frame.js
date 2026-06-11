@@ -59,38 +59,38 @@ export function buildFrame(M) {
   seatCluster.scale.set(1.25, 1.25, 1.0);
   g.add(seatCluster);
 
-  // --- Chainstays: curve outward around the tire, taper to dropouts
+  // --- Chainstays: tuck around the tire, then flare out to 130 mm dropouts
+  // (dropouts must sit OUTBOARD of the cassette, z ≈ ±0.069)
   for (const side of [1, -1]) {
-    const z = side * 0.035;
     const stay = curveTube([
       BB.clone().add(new THREE.Vector3(0.005, -0.004, side * 0.028)),
-      new THREE.Vector3(-0.14, 0.295, z + side * 0.012),
-      new THREE.Vector3(-0.30, 0.32, z),
-      REAR_AXLE.clone().add(new THREE.Vector3(0.012, 0.002, side * 0.030)),
+      new THREE.Vector3(-0.14, 0.295, side * 0.047),
+      new THREE.Vector3(-0.30, 0.318, side * 0.044),
+      REAR_AXLE.clone().add(new THREE.Vector3(0.012, 0.002, side * 0.069)),
     ], TUBES.chainstayR0, M.frame, 40, 14);
     g.add(stay);
 
     // Rubber chainstay protector on the drive side (sleeve over the stay)
     if (side === 1) {
       const guard = curveTube([
-        new THREE.Vector3(-0.09, 0.286, 0.041),
-        new THREE.Vector3(-0.19, 0.302, 0.045),
-        new THREE.Vector3(-0.295, 0.319, 0.0355),
+        new THREE.Vector3(-0.09, 0.286, 0.040),
+        new THREE.Vector3(-0.19, 0.302, 0.046),
+        new THREE.Vector3(-0.295, 0.319, 0.044),
       ], TUBES.chainstayR0 + 0.0022, M.grip, 24, 12);
       g.add(guard);
     }
 
-    // Seatstays: slim, slightly arced
+    // Seatstays: slim, slightly arced, also landing on the wide dropouts
     const ss = curveTube([
       SS_TOP.clone().add(new THREE.Vector3(0, 0, side * 0.013)),
       new THREE.Vector3(-0.27, 0.55, side * 0.030),
-      REAR_AXLE.clone().add(new THREE.Vector3(0.004, 0.012, side * 0.030)),
+      REAR_AXLE.clone().add(new THREE.Vector3(0.004, 0.012, side * 0.069)),
     ], TUBES.seatstayR0, M.frame, 32, 12);
     g.add(ss);
 
-    // --- Rear dropouts: forged plates joining stay ends
+    // --- Rear dropouts: forged plates fully outboard of the cassette
     const dropout = buildDropout(M);
-    dropout.position.copy(REAR_AXLE).add(new THREE.Vector3(0, 0, side * 0.0335));
+    dropout.position.copy(REAR_AXLE).add(new THREE.Vector3(0, 0, side * 0.071));
     dropout.rotation.y = side === 1 ? 0 : Math.PI;
     g.add(dropout);
   }

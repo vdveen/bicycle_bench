@@ -85,7 +85,7 @@ function platformPedal(M) {
   return grp;
 }
 
-export function buildDrivetrain(M, rearWheelSpin) {
+export function buildDrivetrain(M) {
   const group = new THREE.Group();
   group.name = 'drivetrain';
 
@@ -128,7 +128,10 @@ export function buildDrivetrain(M, rearWheelSpin) {
     crank.add(sp);
   }
 
-  // --- Cassette: 10 toothed cogs + spacers + lockring, spins with rear wheel
+  // --- Cassette: 10 toothed cogs + spacers + lockring.
+  // NOT parented to the wheel: a freehub couples the cassette to the CHAIN
+  // (it stops when you stop pedalling) while the wheel spins freely.
+  // The caller mounts it at the rear axle and rotates it with the crank.
   const cassette = new THREE.Group();
   CASSETTE.forEach((t, i) => {
     const cog = new THREE.Mesh(sprocketGeometry(t, 0.0018, { holeR: 0.0165, toothDepth: 0.0040 }), M.brushedAlu);
@@ -145,7 +148,6 @@ export function buildDrivetrain(M, rearWheelSpin) {
   lockring.rotation.x = Math.PI / 2;
   lockring.position.z = CASSETTE_Z0 + CASSETTE.length * CASSETTE_DZ;
   cassette.add(lockring);
-  rearWheelSpin.add(cassette); // wheel-local frame == axle frame
 
   // --- Rear derailleur ---------------------------------------------------
   // Pulley centres in world XY (z = chainline); exported for the chain path.
@@ -155,11 +157,12 @@ export function buildDrivetrain(M, rearWheelSpin) {
   const rd = new THREE.Group();
   group.add(rd);
   // Hanger + B-knuckle
+  // Hanger drops from the drive-side dropout (outboard of the cassette)
   const hanger = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.032, 0.005), M.darkSteel);
-  hanger.position.set(REAR_AXLE.x + 0.006, REAR_AXLE.y - 0.020, 0.040);
+  hanger.position.set(REAR_AXLE.x + 0.006, REAR_AXLE.y - 0.020, 0.0655);
   rd.add(hanger);
   const bKnuckle = new THREE.Mesh(new THREE.SphereGeometry(0.011, 14, 10), M.crank);
-  bKnuckle.position.set(REAR_AXLE.x + 0.008, REAR_AXLE.y - 0.036, 0.043);
+  bKnuckle.position.set(REAR_AXLE.x + 0.008, REAR_AXLE.y - 0.036, 0.060);
   rd.add(bKnuckle);
   // Parallelogram body angling outward/down to the P-knuckle
   const pKnuckle = new THREE.Vector3(G.x - 0.006, G.y + 0.013, CHAINLINE_Z + 0.004);
